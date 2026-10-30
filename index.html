@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0a7d3e">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Ayarou Data</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0}</style>
+</head>
+<body>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: single-column phone app. Sticky TEST MODE banner, auth screens, six-tab bottom bar, bottom sheets for checkout and receipts. */
+:root{
+  --bg:#f3f8f4; --surface:#ffffff; --fg:#10241a; --muted:#566b5f; --line:#d9e5dd;
+  --green:#0a7d3e; --green-soft:#e2f2e7; --on-green:#ffffff;
+  --hero-a:#0a7d3e; --hero-b:#075c2e; --on-hero:#ffffff; --on-hero-soft:#cfe9d8;
+  --warn-bg:#ffe08a; --warn-fg:#4a3200;
+  --bad:#b3261e; --bad-soft:#fdeceb;
+  --font-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --font-body:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1410; --surface:#13211a; --fg:#e7f2ea; --muted:#9db3a5; --line:#233529;
+    --green:#38c673; --green-soft:#17301f; --on-green:#04200f;
+    --hero-a:#14532d; --hero-b:#0d3a1f; --on-hero:#ffffff; --on-hero-soft:#b7dcc5;
+    --warn-bg:#5a4300; --warn-fg:#ffe9a8;
+    --bad:#ff8a80; --bad-soft:#3a1714;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1410; --surface:#13211a; --fg:#e7f2ea; --muted:#9db3a5; --line:#233529;
+  --green:#38c673; --green-soft:#17301f; --on-green:#04200f;
+  --hero-a:#14532d; --hero-b:#0d3a1f; --on-hero:#ffffff; --on-hero-soft:#b7dcc5;
+  --warn-bg:#5a4300; --warn-fg:#ffe9a8;
+  --bad:#ff8a80; --bad-soft:#3a1714;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--font-body); font-size:16px; line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 24px; min-height:100%;
+}
+body.authed{padding-block:0 96px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--warn-bg)}
+.shell{max-width:480px;margin:0 auto}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:1.65rem;line-height:1.15}
+h2{font-size:1.1rem}
+p{margin:0}
+a{color:var(--green);font-weight:600}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+
+.demo{position:sticky;top:env(safe-area-inset-top,0px);z-index:35;
+  margin-left:calc(-1 * max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(16px,env(safe-area-inset-right,0px)));
+  padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));
+  background:var(--warn-bg);color:var(--warn-fg);font-size:.8rem;line-height:1.3;display:flex;gap:10px;align-items:center;justify-content:center}
+.demo b{letter-spacing:.08em;font-weight:700;white-space:nowrap;border:1.5px solid currentColor;border-radius:4px;padding:1px 6px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px 8px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{width:36px;height:36px;border-radius:10px;background:#000;object-fit:cover;flex:none}
+.brand strong{font-family:var(--font-display);font-size:1.15rem;display:block;line-height:1.1}
+.brand span{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+.flag{display:flex;flex:none;width:28px;height:18px;border-radius:3px;overflow:hidden;border:1px solid var(--line)}
+.flag i{flex:1;background:#0a7d3e}.flag i:nth-child(2){background:#fff}
+
+.view{padding-block:12px 8px;display:flex;flex-direction:column;gap:18px}
+.view[hidden]{display:none}
+.lead{color:var(--muted)}
+
+.hero{background:linear-gradient(150deg,var(--hero-a),var(--hero-b));color:var(--on-hero);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.hero small{color:var(--on-hero-soft);font-size:.85rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hero .bal{font-family:var(--font-display);font-weight:700;font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:6px}
+.hero .row{display:flex;gap:10px;flex-wrap:wrap}
+.tag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.08em;border-radius:4px;padding:2px 6px;background:var(--warn-bg);color:var(--warn-fg)}
+
+.btn{min-height:48px;padding:0 20px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;color:var(--fg)}
+.btn.primary{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.btn.light{background:#fff;border-color:#fff;color:#075c2e}
+.btn.ghost-hero{background:transparent;border-color:rgba(255,255,255,.55);color:#fff}
+.btn.bad{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.block{width:100%}
+
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--fg);min-width:0}
+.tile .ic{width:44px;height:44px;border-radius:12px;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+.tile strong{font-family:var(--font-display);font-size:1.05rem}
+.tile span.s{color:var(--muted);font-size:.85rem}
+
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sec-head a{font-size:.9rem}
+
+.field{display:flex;flex-direction:column;gap:8px}
+.lbl{font-weight:700;font-size:.95rem}
+.nets{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.net{min-height:56px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:10px;padding:0 14px;font-weight:700;cursor:pointer;text-align:left}
+.net svg{width:28px;height:28px;flex:none}
+.net[aria-checked="true"]{border-color:var(--green);background:var(--green-soft);box-shadow:inset 0 0 0 1px var(--green)}
+.input{width:100%;min-height:52px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);padding:0 14px;font-size:1.05rem}
+.input.num{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.input:focus{border-color:var(--green)}
+.input.invalid{border-color:var(--bad)}
+.input[readonly]{color:var(--muted)}
+.pw{position:relative}
+.pw .input{padding-right:78px}
+.pwbtn{position:absolute;right:6px;top:6px;bottom:6px;min-width:64px;border:0;background:transparent;color:var(--green);font-weight:700;border-radius:8px;cursor:pointer}
+.hint{font-size:.85rem;color:var(--muted);min-height:1.2em}
+.hint.ok{color:var(--green);font-weight:600}.hint.err{color:var(--bad);font-weight:600}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.opt{min-height:68px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:10px 14px;text-align:left}
+.opt strong{font-family:var(--font-display);font-size:1.2rem;font-variant-numeric:tabular-nums}
+.opt span{color:var(--muted);font-size:.9rem;font-variant-numeric:tabular-nums}
+.opt[aria-pressed="true"]{border-color:var(--green);background:var(--green-soft);box-shadow:inset 0 0 0 1px var(--green)}
+.alert{border-radius:12px;padding:12px 14px;font-size:.92rem}
+.alert.bad{background:var(--bad-soft);color:var(--bad)}
+.alert.warn{background:var(--warn-bg);color:var(--warn-fg)}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-height:40px;padding:0 16px;border-radius:20px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--on-green)}
+
+.method{display:flex;gap:12px;align-items:center;min-height:56px;border-radius:12px;border:1.5px solid var(--line);padding:8px 14px;background:var(--surface);width:100%;text-align:left}
+.method .mt{flex:1;min-width:0}.method b{display:block}.method span{font-size:.82rem;color:var(--muted)}
+.method.on{border-color:var(--green);background:var(--green-soft);box-shadow:inset 0 0 0 1px var(--green)}
+.method:disabled{opacity:.6;cursor:not-allowed}
+.radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:none}
+.method.on .radio{border-color:var(--green);background:radial-gradient(var(--green) 45%,transparent 50%)}
+
+.list{display:flex;flex-direction:column}
+.tx{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;cursor:pointer}
+.list .tx:first-child{border-top:0}
+.tx .ic{width:40px;height:40px;border-radius:12px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;flex:none}
+.tx.failed .ic{background:var(--bad-soft);color:var(--bad)}
+.tx .mid{flex:1;min-width:0}
+.tx .t{font-weight:700;overflow-wrap:anywhere}
+.tx .m{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+.tx .rt{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.tx .amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tx .amt.in{color:var(--green)}
+.tx .amt.fail{color:var(--muted);text-decoration:line-through}
+.pill{display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.06em;border-radius:4px;padding:1px 5px;background:var(--warn-bg);color:var(--warn-fg)}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.empty{color:var(--muted);text-align:center;padding:18px 0}
+
+.kv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.kv:first-child{border-top:0}
+.kv span{color:var(--muted)}.kv b{text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px}
+.stat b{display:block;font-family:var(--font-display);font-size:1.4rem;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.85rem}
+.plain-list{margin:0;padding-left:1.1rem;display:flex;flex-direction:column;gap:6px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.auth-hero{background:linear-gradient(150deg,var(--hero-a),var(--hero-b));color:var(--on-hero);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:6px}
+.auth-hero h1{font-size:1.8rem}
+.auth-hero p{color:var(--on-hero-soft)}
+.swap{text-align:center;color:var(--muted)}
+
+nav.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1.5px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+nav.bar[hidden]{display:none}
+nav.bar ul{list-style:none;margin:0 auto;padding:0;max-width:480px;display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+nav.bar a{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:52px;justify-content:center;border-radius:12px;text-decoration:none;color:var(--muted);font-size:.68rem;font-weight:600}
+nav.bar a[aria-current="page"]{color:var(--green);background:var(--green-soft)}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(5,20,12,.55);display:flex;align-items:flex-end;justify-content:center}
+.scrim[hidden]{display:none}
+.sheet{width:100%;max-width:480px;background:var(--surface);border-radius:22px 22px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;max-height:92%;overflow-y:auto}
+.sheet .btns{display:flex;flex-direction:column;gap:10px}
+.okc{width:64px;height:64px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin:0 auto}
+.okc.bad{background:var(--bad-soft);color:var(--bad)}
+.okc svg{width:34px;height:34px;stroke-width:2.4}
+.spin{width:44px;height:44px;border-radius:50%;border:4px solid var(--green-soft);border-top-color:var(--green);margin:8px auto}
+.center{text-align:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px);text-align:center}
+.toast[hidden]{display:none}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}.spin{animation:sp .9s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}}
+</style>
+
+<div class="shell">
+  <div class="demo" role="note"><b>TEST MODE</b><span>Simulated only. No real money, airtime or data is used.</span></div>
+
+  <header class="top">
+    <div class="brand"><img class="mark" src="data:image/png;base64,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" alt="Ayarou Data logo" width="36" height="36"><div><strong>Ayarou Data</strong><span id="hello">Data and airtime in naira</span></div></div>
+    <div class="flag" aria-hidden="true"><i></i><i></i><i></i></div>
+  </header>
+
+  <main>
+    <!-- AUTH -->
+    <section class="view" id="view-login" hidden>
+      <div class="auth-hero"><h1>Welcome back</h1><p>Log in to buy data and airtime.</p></div>
+      <form class="card" id="li-form" novalidate>
+        <div class="field"><label class="lbl" for="li-phone">Phone number</label><input class="input num" id="li-phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="16" placeholder="0803 123 4567"><p class="hint" id="li-phone-m"></p></div>
+        <div class="field"><label class="lbl" for="li-pw">Password (6 numbers)</label><div class="pw"><input class="input num pwnum" id="li-pw" type="password" autocomplete="current-password" inputmode="numeric" maxlength="6"><button class="pwbtn" type="button" data-for="li-pw">Show</button></div><p class="hint" id="li-pw-m"></p></div>
+        <div class="alert bad" id="li-err" role="alert" hidden></div>
+        <button class="btn primary block" id="li-go" type="submit">Log in</button>
+      </form>
+      <p class="swap">New here? <a href="#signup">Create an account</a></p>
+      <div class="alert warn"><b>TEST MODE.</b> Test accounts stay on this phone only. Do not use numbers you use anywhere else, like a bank PIN.</div>
+    </section>
+
+    <section class="view" id="view-signup" hidden>
+      <div class="auth-hero"><h1>Create your account</h1><p>It takes about a minute.</p></div>
+      <form class="card" id="su-form" novalidate>
+        <div class="field"><label class="lbl" for="su-name">Full name</label><input class="input" id="su-name" autocomplete="name" maxlength="40"><p class="hint" id="su-name-m"></p></div>
+        <div class="field"><label class="lbl" for="su-phone">Phone number</label><input class="input num" id="su-phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="16" placeholder="0803 123 4567"><p class="hint" id="su-phone-m">You will use this number to log in.</p></div>
+        <div class="field"><label class="lbl" for="su-pw">Password (6 numbers)</label><div class="pw"><input class="input num pwnum" id="su-pw" type="password" autocomplete="new-password" inputmode="numeric" maxlength="6"><button class="pwbtn" type="button" data-for="su-pw">Show</button></div><p class="hint" id="su-pw-m">Use 6 numbers only. Do not use 123456.</p></div>
+        <div class="field"><label class="lbl" for="su-pw2">Type the password again</label><div class="pw"><input class="input num pwnum" id="su-pw2" type="password" autocomplete="new-password" inputmode="numeric" maxlength="6"><button class="pwbtn" type="button" data-for="su-pw2">Show</button></div><p class="hint" id="su-pw2-m"></p></div>
+        <div class="alert bad" id="su-err" role="alert" hidden></div>
+        <button class="btn primary block" id="su-go" type="submit">Create account</button>
+      </form>
+      <p class="swap">Already have an account? <a href="#login">Log in</a></p>
+      <div class="alert warn"><b>TEST MODE.</b> This account exists only on this phone. Real accounts come later with the secure backend.</div>
+    </section>
+
+    <!-- HOME -->
+    <section class="view" id="view-home" hidden>
+      <div class="hero">
+        <div><small><span class="tag">TEST WALLET</span> Simulated balance</small><div class="bal" data-bal>₦0</div></div>
+        <div class="row"><a class="btn light" href="#wallet">Add test funds</a><a class="btn ghost-hero" href="#history">History</a></div>
+      </div>
+      <div class="tiles">
+        <a class="tile" href="#data"><span class="ic" data-ic="data"></span><strong>Buy Data</strong><span class="s">MTN, Airtel, Glo, 9mobile</span></a>
+        <a class="tile" href="#airtime"><span class="ic" data-ic="airtime"></span><strong>Buy Airtime</strong><span class="s">From ₦50 to ₦2,000</span></a>
+        <a class="tile" href="#wallet"><span class="ic" data-ic="wallet"></span><strong>Wallet</strong><span class="s">Add and check funds</span></a>
+        <a class="tile" href="#history"><span class="ic" data-ic="history"></span><strong>History</strong><span class="s">Every transaction</span></a>
+      </div>
+      <div class="card">
+        <div class="sec-head"><h2>Recent activity</h2><a href="#history">See all</a></div>
+        <div class="list" id="home-recent"></div>
+      </div>
+      <div class="alert warn"><b>You are in test mode.</b> Purchases here are practice runs. Live purchases switch on only after the secure backend and a data provider are connected.</div>
+    </section>
+
+    <!-- BUY (built by script) -->
+    <section class="view" id="view-data" hidden></section>
+    <section class="view" id="view-airtime" hidden></section>
+
+    <!-- WALLET -->
+    <section class="view" id="view-wallet" hidden>
+      <h1>Wallet</h1>
+      <div class="hero"><div><small><span class="tag">TEST WALLET</span> Simulated balance</small><div class="bal" data-bal>₦0</div></div></div>
+      <div class="card">
+        <h2>Add money</h2>
+        <div class="field">
+          <button class="method on" type="button" aria-pressed="true"><span class="radio"></span><span class="mt"><b>Test funds</b><span>Simulated. No real money.</span></span></button>
+          <button class="method" type="button" disabled><span class="radio"></span><span class="mt"><b>Card</b><span>Needs a payment gateway. Not connected yet.</span></span></button>
+          <button class="method" type="button" disabled><span class="radio"></span><span class="mt"><b>Bank transfer</b><span>Needs a payment gateway. Not connected yet.</span></span></button>
+        </div>
+        <div class="opts" id="fund-presets"></div>
+        <div class="field"><label class="lbl" for="fund-amt">Or type an amount (₦100 to ₦50,000)</label>
+          <input class="input num" id="fund-amt" inputmode="numeric" autocomplete="off" placeholder="e.g. 1500"><p class="hint" id="fund-msg"></p></div>
+        <button class="btn primary block" id="fund-go" type="button">Add test funds</button>
+      </div>
+      <div class="card"><h2>Recent top-ups</h2><div class="list" id="wallet-recent"></div></div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="view" id="view-history" hidden>
+      <h1>Transaction History</h1>
+      <div class="alert warn"><b>TEST MODE.</b> Everything below is simulated. Tap a row to see its receipt.</div>
+      <div class="chips" id="hist-filter" role="group" aria-label="Filter transactions"></div>
+      <div class="card"><div class="list" id="hist-list"></div></div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="view" id="view-profile" hidden>
+      <h1>Profile</h1>
+      <div class="stats"><div class="stat"><b id="st-count">0</b><span>Test purchases</span></div><div class="stat"><b id="st-spent">₦0</b><span>Test money spent</span></div></div>
+      <div class="card">
+        <h2>Your details</h2>
+        <div class="field"><label class="lbl" for="pf-name">Name</label><input class="input" id="pf-name" maxlength="40" autocomplete="off"></div>
+        <div class="field"><label class="lbl" for="pf-phone">Phone number</label><input class="input num" id="pf-phone" readonly><p class="hint" id="pf-msg">This is the number you use to log in.</p></div>
+        <button class="btn primary block" id="pf-save" type="button">Save name</button>
+      </div>
+      <div class="card">
+        <h2>Mode</h2>
+        <button class="method on" type="button" aria-pressed="true"><span class="radio"></span><span class="mt"><b>Test mode</b><span>Simulated purchases. Nothing real happens.</span></span></button>
+        <button class="method" type="button" disabled><span class="radio"></span><span class="mt"><b>Live mode</b><span>Switched off. Needs the secure backend and a data provider.</span></span></button>
+      </div>
+      <div class="card">
+        <h2>Test tools</h2>
+        <p class="lead">Choose what the next simulated purchases do, so you can try both results.</p>
+        <div class="seg" role="group" aria-label="Simulated result"><button class="chip" type="button" data-oc="success" aria-pressed="true">Succeed</button><button class="chip" type="button" data-oc="failed" aria-pressed="false">Fail</button></div>
+        <div id="reset-box"></div>
+      </div>
+      <button class="btn block" id="logout" type="button">Log out</button>
+    </section>
+  </main>
+</div>
+
+<nav class="bar" id="navbar" aria-label="Main" hidden><ul id="nav"></ul></nav>
+
+<div class="scrim" id="scrim" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   CONFIG. Change these when the real backend exists.
+   ========================================================= */
+var CONFIG={
+  LIVE_ENABLED:false,      // stays false until the backend and provider are connected
+  API_BASE:'',             // later: your backend address, e.g. https://api.yourdomain.com
+  TEST_START_BALANCE:2500,
+  FUND_MIN:100,
+  FUND_MAX:50000
+};
+var NETS=[{id:'MTN',c:'#FFCC00'},{id:'Airtel',c:'#E4002B'},{id:'Glo',c:'#2FA84F'},{id:'9mobile',c:'#0B6B3A'}];
+/* Plans per network. Later these come from the provider through the backend. */
+var BASE_PLANS=[{id:'d500',label:'500 MB',price:300},{id:'d1',label:'1 GB',price:500},{id:'d2',label:'2 GB',price:1000},{id:'d5',label:'5 GB',price:2200}];
+var PLANS={MTN:BASE_PLANS,Airtel:BASE_PLANS,Glo:BASE_PLANS,'9mobile':BASE_PLANS};
+var AIR=[50,100,200,500,1000,2000].map(function(a){return{id:'a'+a,label:naira(a),price:a}});
+var FUND=[500,1000,2000,5000];
+var VIEWS=['home','data','airtime','wallet','history','profile'];
+var AUTHV=['login','signup'];
+var NAV=[['home','Home'],['data','Data'],['airtime','Airtime'],['wallet','Wallet'],['history','History'],['profile','Profile']];
+var ICON={
+  home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  data:'<path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01"/>',
+  airtime:'<path d="M8 2h8a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM11 18h2"/>',
+  wallet:'<path d="M3 7a2 2 0 0 1 2-2h13v4M3 7v11a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H5a2 2 0 0 1-2-2M16 14.5h.01"/>',
+  history:'<path d="M12 7v5l3 2M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/>',
+  profile:'<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0"/>',
+  funding:'<path d="M12 5v14M5 12h14"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  cross:'<path d="M6 6l12 12M18 6L6 18"/>'
+};
+
+/* ---------- helpers ---------- */
+function naira(n){return '₦'+Number(n).toLocaleString('en-US')}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function svg(k){return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+ICON[k]+'</svg>'}
+function $(id){return document.getElementById(id)}
+function fmtPhone(p){return p.slice(0,4)+' '+p.slice(4,7)+' '+p.slice(7)}
+function normPhone(s){
+  var d=String(s).replace(/[\s\-()]/g,'');
+  if(d.indexOf('+234')===0)d='0'+d.slice(4);
+  else if(d.indexOf('234')===0&&d.length===13)d='0'+d.slice(3);
+  return /^0[789][01]\d{8}$/.test(d)?d:null;
+}
+function fmtTime(ts){
+  try{return new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true,timeZone:'Africa/Lagos'})}catch(e){return ''}
+}
+function rnd(){
+  try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID()}catch(e){}
+  return Date.now().toString(36)+Math.random().toString(36).slice(2);
+}
+function wait(ms){return new Promise(function(r){setTimeout(r,ms)})}
+var toastTimer;
+function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.hidden=true},2600)}
+function setErr(id,msg){var i=$(id),m=$(id+'-m');if(!i)return;i.classList.toggle('invalid',!!msg);if(m){m.className='hint'+(msg?' err':'');m.textContent=msg||''}}
+function setBox(id,msg){var b=$(id);b.hidden=!msg;b.textContent=msg||''}
+
+/* =========================================================
+   STORAGE. Test data lives only in this browser.
+   ========================================================= */
+var KEY='ayarou-app-v3';   // accounts are now keyed by phone number
+var DB=(function(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&d.users){d.locks=d.locks||{};return d}}}catch(e){}return{users:{},session:'',locks:{}}})();
+function saveDB(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}}
+var U=(DB.session&&DB.users[DB.session])||null;
+function mode(){return 'test'}   // 'live' is not possible while CONFIG.LIVE_ENABLED is false
+function balance(){return U?(U.wallet[mode()]||0):0}
+
+function hashPw(pw,salt){
+  var enc=new TextEncoder().encode(salt+':'+pw);
+  return crypto.subtle.digest('SHA-256',enc).then(function(buf){
+    return Array.prototype.map.call(new Uint8Array(buf),function(b){return b.toString(16).padStart(2,'0')}).join('');
+  });
+}
+function newTx(o){
+  U.seq=(U.seq||0)+1;
+  var t={id:U.seq,ref:'TST-'+String(U.seq).padStart(5,'0'),mode:'test',ts:Date.now(),kind:o.kind,status:o.status,title:o.title,amount:o.amount,network:o.network||'',phone:o.phone||''};
+  U.tx.unshift(t);return t;
+}
+
+/* =========================================================
+   API LAYER. The screens only talk to api().
+   SimApi is the test simulator. LiveApi is the shape the real
+   backend must follow. Nothing in LiveApi is connected yet.
+
+   Planned backend routes (all over HTTPS, server holds all secrets):
+     POST /auth/signup   {name,phone,password}   (password = 6 numbers; server must hash it and limit wrong tries)
+     POST /auth/login    {phone,password}
+     GET  /wallet
+     POST /wallet/fund   {amount}              -> payment gateway checkout
+     GET  /plans?network=MTN                   -> plans from the provider
+     POST /orders        {key,kind,network,phone,itemId}   (key = idempotency key)
+     GET  /transactions
+   ========================================================= */
+var SimApi={
+  signup:function(p){
+    if(!window.crypto||!crypto.subtle)return Promise.reject(new Error('This browser cannot create test accounts here. Try Chrome.'));
+    if(DB.users[p.phone])return Promise.reject(new Error('This phone number already has an account. Please log in.'));
+    var salt=rnd();
+    return hashPw(p.password,salt).then(function(hash){
+      var u={name:p.name,phone:p.phone,salt:salt,hash:hash,created:Date.now(),wallet:{test:CONFIG.TEST_START_BALANCE},seq:0,tx:[],done:{},prefs:{outcome:'success'}};
+      DB.users[p.phone]=u;DB.session=p.phone;U=u;
+      newTx({kind:'funding',status:'success',title:'Test starting balance',amount:CONFIG.TEST_START_BALANCE});
+      saveDB();return u;
+    });
+  },
+  login:function(phone,pw){
+    if(!window.crypto||!crypto.subtle)return Promise.reject(new Error('This browser cannot log in here. Try Chrome.'));
+    var lock=DB.locks[phone];
+    if(lock&&lock.until>Date.now())return Promise.reject(new Error('Too many wrong tries. Please wait '+Math.ceil((lock.until-Date.now())/1000)+' seconds and try again.'));
+    var u=DB.users[phone];
+    var bad=new Error('Phone number or password is wrong.');
+    function miss(){
+      var l=DB.locks[phone]||{n:0,until:0};l.n+=1;
+      if(l.n>=5){l.until=Date.now()+60000;l.n=0}
+      DB.locks[phone]=l;saveDB();throw bad;
+    }
+    if(!u)return hashPw(pw,'x').then(miss);
+    return hashPw(pw,u.salt).then(function(h){
+      if(h!==u.hash)miss();
+      delete DB.locks[phone];DB.session=u.phone;U=u;saveDB();return u;
+    });
+  },
+  logout:function(){DB.session='';U=null;saveDB();return Promise.resolve()},
+  fund:function(amount){
+    U.wallet.test=(U.wallet.test||0)+amount;
+    var t=newTx({kind:'funding',status:'success',title:'Test funds added',amount:amount});
+    saveDB();return Promise.resolve({status:'success',tx:t});
+  },
+  purchase:function(order){
+    if(U.done[order.key]){var prev=U.tx.filter(function(t){return t.id===U.done[order.key]})[0];return Promise.resolve({status:prev?prev.status:'success',tx:prev})}
+    return wait(1300).then(function(){
+      if(order.amount>(U.wallet.test||0))return{status:'insufficient'};
+      var ok=U.prefs.outcome!=='failed';
+      if(ok)U.wallet.test-=order.amount;
+      var t=newTx({kind:order.kind,status:ok?'success':'failed',title:order.title,amount:order.amount,network:order.network,phone:order.phone});
+      U.done[order.key]=t.id;saveDB();
+      return{status:t.status,tx:t};
+    });
+  },
+  reset:function(){
+    U.wallet.test=CONFIG.TEST_START_BALANCE;U.tx=[];U.done={};U.seq=0;
+    newTx({kind:'funding',status:'success',title:'Test starting balance',amount:CONFIG.TEST_START_BALANCE});
+    saveDB();return Promise.resolve();
+  }
+};
+var LiveApi=(function(){
+  function off(){return Promise.reject(new Error('Live mode is not connected yet.'))}
+  return{signup:off,login:off,logout:off,fund:off,purchase:off,reset:off};
+})();
+function api(){return(CONFIG.LIVE_ENABLED&&mode()==='live')?LiveApi:SimApi}
+
+/* =========================================================
+   AUTH SCREENS
+   ========================================================= */
+document.querySelectorAll('.pwbtn').forEach(function(b){
+  b.addEventListener('click',function(){
+    var i=$(b.dataset.for),show=i.type==='password';
+    i.type=show?'text':'password';b.textContent=show?'Hide':'Show';
+  });
+});
+document.querySelectorAll('.pwnum').forEach(function(i){
+  i.addEventListener('input',function(){var v=i.value.replace(/\D/g,'').slice(0,6);if(v!==i.value)i.value=v});
+});
+/* Numbers-only passwords are easy to guess, so block the most common ones. */
+function weakPw(p){
+  if(/^(\d)\1+$/.test(p))return true;                     // 111111
+  var up='0123456789012345678901234567890',dn='9876543210987654321098765432109';
+  if(up.indexOf(p)>=0||dn.indexOf(p)>=0)return true;      // 123456, 654321
+  if(/^(\d{2})\1\1$/.test(p)||/^(\d{3})\1$/.test(p))return true;  // 121212, 123123
+  return ['000000','112233','159753','147258','258369','696969','007007'].indexOf(p)>=0;
+}
+
+$('su-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var name=$('su-name').value.trim(),phone=normPhone($('su-phone').value.trim()),pw=$('su-pw').value,pw2=$('su-pw2').value;
+  var bad=false;
+  setBox('su-err','');
+  setErr('su-name',name.length<2?(bad=true,'Enter your full name.'):'');
+  setErr('su-phone',!phone?(bad=true,'Enter a Nigerian number like 0803 123 4567.'):'');
+  if(phone)$('su-phone-m').textContent='You will use this number to log in.';
+  var pwBad=!/^\d{6}$/.test(pw)?'Type exactly 6 numbers.':(weakPw(pw)?'Too easy to guess. Choose different numbers.':'');
+  if(pwBad)bad=true;
+  setErr('su-pw',pwBad);
+  if(!pwBad)$('su-pw-m').textContent='Use 6 numbers only. Do not use 123456.';
+  setErr('su-pw2',(!pwBad&&pw2!==pw)?(bad=true,'The two passwords are not the same.'):'');
+  if(bad)return;
+  var btn=$('su-go');btn.disabled=true;btn.textContent='Creating account...';
+  api().signup({name:name,phone:phone,password:pw}).then(function(){
+    $('su-form').reset();onSignedIn();go('home');
+  }).catch(function(err){setBox('su-err',err.message)}).then(function(){btn.disabled=false;btn.textContent='Create account'});
+});
+$('li-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var phone=normPhone($('li-phone').value.trim()),pw=$('li-pw').value,bad=false;
+  setBox('li-err','');
+  setErr('li-phone',!phone?(bad=true,'Enter the phone number you signed up with.'):'');
+  setErr('li-pw',!/^\d{6}$/.test(pw)?(bad=true,'Your password is 6 numbers.'):'');
+  if(bad)return;
+  var btn=$('li-go');btn.disabled=true;btn.textContent='Logging in...';
+  api().login(phone,pw).then(function(){
+    $('li-form').reset();onSignedIn();go('home');
+  }).catch(function(err){setBox('li-err',err.message)}).then(function(){btn.disabled=false;btn.textContent='Log in'});
+});
+function onSignedIn(){
+  ['data','airtime'].forEach(function(k){if(U.phone){$(k+'-phone').value=fmtPhone(U.phone);phoneMsg(k,false)}B[k].sel=null});
+  document.body.classList.add('authed');$('navbar').hidden=false;
+}
+
+/* =========================================================
+   TRANSACTION ROWS AND RECEIPT
+   ========================================================= */
+function txRow(t){
+  var failed=t.status==='failed',buy=t.kind!=='funding';
+  var sub=[];if(t.phone)sub.push(fmtPhone(t.phone));sub.push(fmtTime(t.ts));
+  var sign=failed?'':(buy?'−':'+');
+  return '<button type="button" class="tx'+(failed?' failed':'')+'" data-tx="'+t.id+'"><div class="ic">'+svg(failed?'cross':t.kind)+'</div>'+
+    '<div class="mid"><div class="t">'+esc(t.title)+'</div><div class="m">'+esc(sub.join(' · '))+'</div></div>'+
+    '<div class="rt"><div class="amt'+(failed?' fail':(buy?'':' in'))+'">'+sign+naira(t.amount)+'</div>'+
+    '<div><span class="pill '+(failed?'bad':'ok')+'">'+(failed?'FAILED':'SUCCESS')+'</span> <span class="pill">TEST</span></div></div></button>';
+}
+function bindRows(root){root.querySelectorAll('[data-tx]').forEach(function(b){b.addEventListener('click',function(){showReceipt(Number(b.dataset.tx),b)})})}
+function fillList(el,rows,emptyMsg){el.innerHTML=rows.length?rows.map(txRow).join(''):'<div class="empty">'+emptyMsg+'</div>';bindRows(el)}
+function showReceipt(id,from){
+  var t=U.tx.filter(function(x){return x.id===id})[0];if(!t)return;
+  opener=from;
+  var kinds={data:'Data',airtime:'Airtime',funding:'Wallet top-up'};
+  openSheet('<h2 id="sheet-title">Receipt</h2><div class="alert warn"><b>SIMULATED.</b> This was a test. Nothing real was bought or sent.</div>'+
+    '<div><div class="kv"><span>Status</span><b>'+(t.status==='failed'?'Failed (not charged)':'Success')+'</b></div>'+
+    '<div class="kv"><span>Type</span><b>'+kinds[t.kind]+'</b></div>'+
+    (t.network?'<div class="kv"><span>Network</span><b>'+esc(t.network)+'</b></div>':'')+
+    (t.phone?'<div class="kv"><span>Phone number</span><b>'+fmtPhone(t.phone)+'</b></div>':'')+
+    '<div class="kv"><span>Item</span><b>'+esc(t.title)+'</b></div>'+
+    '<div class="kv"><span>Amount</span><b>'+naira(t.amount)+'</b></div>'+
+    '<div class="kv"><span>Reference</span><b>'+esc(t.ref)+'</b></div>'+
+    '<div class="kv"><span>Date</span><b>'+esc(fmtTime(t.ts))+'</b></div>'+
+    '<div class="kv"><span>Mode</span><b>Test (simulated)</b></div></div>'+
+    '<div class="btns"><button class="btn primary" id="rc-close" type="button">Close</button></div>');
+  $('rc-close').addEventListener('click',closeSheet);
+}
+
+/* =========================================================
+   BUY SCREENS (data + airtime)
+   ========================================================= */
+var B={data:{net:'MTN',sel:null},airtime:{net:'MTN',sel:null}};
+var SIM='<path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="rgba(0,0,0,.4)" stroke-width="1.2" stroke-linejoin="round"/><rect x="8" y="11" width="8" height="7" rx="1.5" fill="rgba(255,255,255,.75)" stroke="rgba(0,0,0,.4)" stroke-width="1"/><path d="M8 14.5h8M12 11v7" stroke="rgba(0,0,0,.4)" stroke-width="1"/>';
+function simIcon(c){return '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="'+c+'">'+SIM.replace('<path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"','<path fill="'+c+'" d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"')+'</g></svg>'}
+function itemsOf(kind){return kind==='data'?PLANS[B.data.net]:AIR}
+function itemOf(kind){var l=itemsOf(kind),id=B[kind].sel;for(var i=0;i<l.length;i++)if(l[i].id===id)return l[i];return null}
+function buildBuy(kind){
+  var isData=kind==='data';
+  var el=$('view-'+kind);
+  el.innerHTML='<h1>'+(isData?'Buy Data':'Buy Airtime')+'</h1><p class="lead">'+(isData?'Choose a network, enter the number, then pick a plan.':'Choose a network, enter the number, then pick an amount.')+'</p>'+
+    '<div class="field"><span class="lbl" id="'+kind+'-nl">1. Network</span><div class="nets" role="radiogroup" aria-labelledby="'+kind+'-nl">'+
+    NETS.map(function(n){return '<button type="button" class="net" role="radio" data-net="'+n.id+'" aria-checked="false">'+simIcon(n.c)+n.id+'</button>'}).join('')+'</div></div>'+
+    '<div class="field"><label class="lbl" for="'+kind+'-phone">2. Phone number</label><input class="input num" id="'+kind+'-phone" type="tel" inputmode="tel" maxlength="16" autocomplete="off" placeholder="0803 123 4567"><p class="hint" id="'+kind+'-pmsg">Type 11 digits, or start with +234.</p></div>'+
+    '<div class="field"><span class="lbl" id="'+kind+'-ol">3. '+(isData?'Data plan':'Airtime amount')+'</span><div class="opts" id="'+kind+'-opts" role="group" aria-labelledby="'+kind+'-ol"></div></div>'+
+    '<div id="'+kind+'-notice"></div>'+
+    '<button class="btn primary block" id="'+kind+'-go" type="button" disabled></button>'+
+    '<div class="alert warn"><b>TEST MODE.</b> This does not buy real '+(isData?'data':'airtime')+'.</div>';
+  el.querySelectorAll('.net').forEach(function(b){b.addEventListener('click',function(){B[kind].net=b.dataset.net;B[kind].sel=null;refreshBuy(kind)})});
+  $(kind+'-phone').addEventListener('input',function(){phoneMsg(kind,false)});
+  $(kind+'-phone').addEventListener('blur',function(){phoneMsg(kind,true)});
+  $(kind+'-go').addEventListener('click',function(){openCheckout(kind)});
+}
+function phoneMsg(kind,strict){
+  var inp=$(kind+'-phone'),msg=$(kind+'-pmsg'),v=inp.value.trim(),ok=normPhone(v);
+  inp.classList.remove('invalid');msg.className='hint';
+  if(!v){msg.textContent='Type 11 digits, or start with +234.';return null}
+  if(ok){msg.textContent='Valid number: '+fmtPhone(ok);msg.className='hint ok';return ok}
+  var digits=v.replace(/\D/g,'');
+  if(strict||digits.length>=11){inp.classList.add('invalid');msg.textContent='Enter a Nigerian number like 0803 123 4567 or +234 803 123 4567.';msg.className='hint err'}
+  else msg.textContent='Keep typing. Nigerian numbers have 11 digits.';
+  return null;
+}
+function refreshBuy(kind){
+  var el=$('view-'+kind),isData=kind==='data',st=B[kind];
+  el.querySelectorAll('.net').forEach(function(b){b.setAttribute('aria-checked',b.dataset.net===st.net?'true':'false')});
+  $(kind+'-opts').innerHTML=itemsOf(kind).map(function(it){
+    return '<button type="button" class="opt" data-id="'+it.id+'" aria-pressed="'+(it.id===st.sel)+'">'+(isData?'<strong>'+it.label+'</strong><span>'+naira(it.price)+'</span>':'<strong>'+it.label+'</strong><span>Airtime</span>')+'</button>';
+  }).join('');
+  $(kind+'-opts').querySelectorAll('.opt').forEach(function(b){b.addEventListener('click',function(){st.sel=b.dataset.id;refreshBuy(kind)})});
+  var it=itemOf(kind),notice=$(kind+'-notice'),go=$(kind+'-go');
+  if(!it){notice.innerHTML='';go.disabled=true;go.textContent='Choose '+(isData?'a plan':'an amount');return}
+  if(it.price>balance()){
+    notice.innerHTML='<div class="alert bad" role="alert"><b>Not enough balance.</b> You have '+naira(balance())+' and need '+naira(it.price)+'. <a href="#wallet">Add test funds</a></div>';
+    go.disabled=true;go.textContent='Insufficient balance';
+  }else{
+    notice.innerHTML='<p class="hint">Balance after purchase: '+naira(balance()-it.price)+'</p>';
+    go.disabled=false;go.textContent='Continue · '+naira(it.price);
+  }
+}
+
+/* =========================================================
+   CHECKOUT
+   ========================================================= */
+var opener=null,busy=false;
+function openSheet(html){$('sheet').innerHTML=html;$('scrim').hidden=false;var f=$('sheet').querySelector('button');if(f)f.focus()}
+function closeSheet(){if(busy)return;$('scrim').hidden=true;$('sheet').innerHTML='';if(opener&&opener.focus&&document.contains(opener)){try{opener.focus()}catch(e){}}opener=null}
+$('scrim').addEventListener('click',function(e){if(e.target===$('scrim'))closeSheet()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('scrim').hidden)closeSheet()});
+
+function openCheckout(kind){
+  var it=itemOf(kind);if(!it)return;
+  var phone=phoneMsg(kind,true);
+  if(!phone){$(kind+'-phone').focus();return}
+  if(it.price>balance()){refreshBuy(kind);return}
+  opener=$(kind+'-go');
+  var isData=kind==='data',net=B[kind].net;
+  var order={key:rnd(),kind:kind,network:net,phone:phone,itemId:it.id,label:it.label,amount:it.price,title:net+' '+it.label+(isData?' data':' airtime')};
+  openSheet('<h2 id="sheet-title">Checkout</h2>'+
+    '<div class="alert warn"><b>TEST MODE.</b> Simulated. No real money moves and nothing is sent.</div>'+
+    '<div><div class="kv"><span>Network</span><b>'+esc(net)+'</b></div><div class="kv"><span>Phone number</span><b>'+fmtPhone(phone)+'</b></div>'+
+    '<div class="kv"><span>'+(isData?'Data plan':'Airtime')+'</span><b>'+esc(it.label)+'</b></div>'+
+    '<div class="kv"><span>Pay from</span><b>Test wallet ('+naira(balance())+')</b></div>'+
+    '<div class="kv"><span>Total</span><b>'+naira(it.price)+'</b></div>'+
+    '<div class="kv"><span>Balance after</span><b>'+naira(balance()-it.price)+'</b></div></div>'+
+    '<div class="btns"><button class="btn primary" id="co-pay" type="button">Pay '+naira(it.price)+' (test)</button><button class="btn" id="co-no" type="button">Cancel</button></div>');
+  $('co-no').addEventListener('click',closeSheet);
+  $('co-pay').addEventListener('click',function(){
+    if(busy)return;busy=true;
+    $('sheet').innerHTML='<div class="center" style="padding:12px 0"><div class="spin" role="status" aria-label="Processing"></div><h2 id="sheet-title">Processing test payment</h2><p class="lead" style="margin-top:6px">Please wait. Do not close this screen.</p></div>';
+    api().purchase(order).catch(function(err){return{status:'error',message:err.message}}).then(function(res){
+      busy=false;refreshAll();B[kind].sel=null;refreshBuy(kind);showResult(kind,order,res);
+    });
+  });
+}
+function showResult(kind,order,res){
+  var isData=kind==='data',what=isData?'data':'airtime';
+  var done=function(){opener=null;closeSheet()};
+  if(res.status==='success'){
+    openSheet('<div class="okc">'+svg('check')+'</div><div class="center"><h2 id="sheet-title">Test purchase complete</h2><p class="lead" style="margin-top:6px">'+naira(order.amount)+' was taken from your test wallet. No real '+what+' was sent to '+fmtPhone(order.phone)+'.</p></div>'+
+      '<div><div class="kv"><span>Reference</span><b>'+esc(res.tx.ref)+'</b></div><div class="kv"><span>New balance</span><b>'+naira(balance())+'</b></div></div>'+
+      '<div class="btns"><button class="btn primary" id="rs-home" type="button">Done</button><button class="btn" id="rs-hist" type="button">View history</button></div>');
+    $('rs-home').addEventListener('click',function(){done();go('home')});
+    $('rs-hist').addEventListener('click',function(){done();go('history')});
+  }else if(res.status==='failed'){
+    openSheet('<div class="okc bad">'+svg('cross')+'</div><div class="center"><h2 id="sheet-title">Test purchase failed</h2><p class="lead" style="margin-top:6px">This is a simulated failure. You were not charged. Your balance is still '+naira(balance())+'.</p></div>'+
+      '<div class="kv"><span>Reference</span><b>'+esc(res.tx.ref)+'</b></div>'+
+      '<div class="btns"><button class="btn primary" id="rs-ok" type="button">Close</button></div>');
+    $('rs-ok').addEventListener('click',done);
+  }else{
+    var msg=res.status==='insufficient'?'Your test wallet does not have enough money for this purchase.':(res.message||'Something went wrong. Please try again.');
+    openSheet('<div class="okc bad">'+svg('cross')+'</div><div class="center"><h2 id="sheet-title">Could not complete</h2><p class="lead" style="margin-top:6px">'+esc(msg)+' You were not charged.</p></div>'+
+      '<div class="btns"><button class="btn primary" id="rs-ok" type="button">Close</button></div>');
+    $('rs-ok').addEventListener('click',done);
+  }
+}
+
+/* =========================================================
+   WALLET
+   ========================================================= */
+function buildWallet(){
+  $('fund-presets').innerHTML=FUND.map(function(a){return '<button type="button" class="opt" data-a="'+a+'" aria-pressed="false"><strong>'+naira(a)+'</strong></button>'}).join('');
+  $('fund-presets').querySelectorAll('.opt').forEach(function(b){b.addEventListener('click',function(){$('fund-amt').value=b.dataset.a;fundMsg()})});
+  $('fund-amt').addEventListener('input',fundMsg);
+  $('fund-go').addEventListener('click',function(){
+    var n=fundMsg();if(!n){$('fund-amt').focus();return}
+    api().fund(n).then(function(){$('fund-amt').value='';fundMsg();refreshAll();toast(naira(n)+' test funds added')})
+      .catch(function(err){toast(err.message)});
+  });
+}
+function fundMsg(){
+  var v=$('fund-amt').value.replace(/[,\s₦]/g,''),msg=$('fund-msg'),inp=$('fund-amt');
+  $('fund-presets').querySelectorAll('.opt').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.a===v?'true':'false')});
+  inp.classList.remove('invalid');msg.className='hint';
+  if(!v){msg.textContent='';return null}
+  var n=Number(v);
+  if(!/^\d+$/.test(v)||n<CONFIG.FUND_MIN||n>CONFIG.FUND_MAX){inp.classList.add('invalid');msg.className='hint err';msg.textContent='Enter a whole number from '+naira(CONFIG.FUND_MIN)+' to '+naira(CONFIG.FUND_MAX)+'.';return null}
+  msg.className='hint ok';msg.textContent='Ready to add '+naira(n)+'.';return n;
+}
+
+/* =========================================================
+   HISTORY + PROFILE
+   ========================================================= */
+var filter='all';
+var FILTERS=[['all','All'],['data','Data'],['airtime','Airtime'],['funding','Funding']];
+function renderHistory(){
+  $('hist-filter').innerHTML=FILTERS.map(function(f){return '<button type="button" class="chip" data-f="'+f[0]+'" aria-pressed="'+(filter===f[0])+'">'+f[1]+'</button>'}).join('');
+  $('hist-filter').querySelectorAll('.chip').forEach(function(b){b.addEventListener('click',function(){filter=b.dataset.f;renderHistory()})});
+  fillList($('hist-list'),U.tx.filter(function(t){return filter==='all'||t.kind===filter}),'No transactions here yet.');
+}
+function renderProfile(){
+  var buys=U.tx.filter(function(t){return t.kind!=='funding'&&t.status==='success'});
+  $('st-count').textContent=buys.length;
+  $('st-spent').textContent=naira(buys.reduce(function(a,t){return a+t.amount},0));
+  if(document.activeElement!==$('pf-name'))$('pf-name').value=U.name;
+  $('pf-phone').value=fmtPhone(U.phone);
+  document.querySelectorAll('[data-oc]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.oc===U.prefs.outcome?'true':'false')});
+  resetBox(false);
+}
+function resetBox(confirming){
+  var b=$('reset-box');
+  if(!confirming){
+    b.innerHTML='<button class="btn block" id="rs-ask" type="button">Reset test data</button>';
+    $('rs-ask').addEventListener('click',function(){resetBox(true)});
+  }else{
+    b.innerHTML='<p class="lead">Put the test wallet back to '+naira(CONFIG.TEST_START_BALANCE)+' and clear the test history?</p><div class="seg" style="margin-top:10px"><button class="btn bad" id="rs-yes" type="button">Yes, reset</button><button class="btn" id="rs-no" type="button">Cancel</button></div>';
+    $('rs-yes').addEventListener('click',function(){api().reset().then(function(){refreshAll();toast('Test data reset')})});
+    $('rs-no').addEventListener('click',function(){resetBox(false)});
+  }
+}
+$('pf-save').addEventListener('click',function(){
+  var n=$('pf-name').value.trim();
+  if(n.length<2){toast('Enter your name');return}
+  U.name=n;saveDB();
+  refreshAll();toast('Name saved');
+});
+document.querySelectorAll('[data-oc]').forEach(function(b){b.addEventListener('click',function(){U.prefs.outcome=b.dataset.oc;saveDB();renderProfile();toast(b.dataset.oc==='failed'?'Next test purchases will fail':'Next test purchases will succeed')})});
+$('logout').addEventListener('click',function(){
+  api().logout().then(function(){document.body.classList.remove('authed');$('navbar').hidden=true;$('hello').textContent='Data and airtime in naira';go('login')});
+});
+
+/* =========================================================
+   RENDER + ROUTER
+   ========================================================= */
+function refreshAll(){
+  if(!U)return;
+  document.querySelectorAll('[data-bal]').forEach(function(e){e.textContent=naira(balance())});
+  $('hello').textContent='Hello, '+U.name.split(' ')[0];
+  fillList($('home-recent'),U.tx.slice(0,3),'No activity yet.');
+  fillList($('wallet-recent'),U.tx.filter(function(t){return t.kind==='funding'}).slice(0,3),'No top-ups yet.');
+  renderHistory();renderProfile();refreshBuy('data');refreshBuy('airtime');
+}
+function go(v){if(location.hash==='#'+v)show(v);else location.hash=v}
+function show(v){
+  if(!U){if(AUTHV.indexOf(v)<0)v='login'}
+  else{if(VIEWS.indexOf(v)<0)v='home'}
+  var all=AUTHV.concat(VIEWS);
+  all.forEach(function(x){$('view-'+x).hidden=(x!==v)});
+  $('nav').querySelectorAll('a').forEach(function(a){if(a.dataset.v===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  refreshAll();window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',function(){show(location.hash.slice(1))});
+
+/* ---------- init ---------- */
+$('nav').innerHTML=NAV.map(function(n){return '<li><a href="#'+n[0]+'" data-v="'+n[0]+'">'+svg(n[0])+n[1]+'</a></li>'}).join('');
+document.querySelectorAll('[data-ic]').forEach(function(e){e.innerHTML=svg(e.dataset.ic)});
+buildBuy('data');buildBuy('airtime');buildWallet();
+if(U)onSignedIn();
+show(location.hash.slice(1)||(U?'home':'login'));
+})();
+</script>
+
+<script>
+if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+}
+</script>
+</body>
+</html>
